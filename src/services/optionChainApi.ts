@@ -1,21 +1,17 @@
+import { supabase } from "@/integrations/supabase/client";
 import { SymbolsResponse, ExpiryResponse, OptionChainResponse } from "@/types/optionChain";
-
-const BASE_URL = "https://runalgo.xyz/data";
 
 export async function fetchSymbols(): Promise<string[]> {
   try {
-    const response = await fetch(`${BASE_URL}/getSymbols.php`, {
-      headers: {
-        "accept": "*/*",
-        "content-type": "application/json",
-      },
+    const { data, error } = await supabase.functions.invoke('option-chain-proxy', {
+      body: { endpoint: 'symbols' }
     });
     
-    if (!response.ok) {
-      throw new Error("Failed to fetch symbols");
+    if (error) {
+      console.error("Error fetching symbols:", error);
+      throw error;
     }
     
-    const data: SymbolsResponse = await response.json();
     return data.symbols || [];
   } catch (error) {
     console.error("Error fetching symbols:", error);
@@ -25,19 +21,19 @@ export async function fetchSymbols(): Promise<string[]> {
 
 export async function fetchExpiryDates(symbol: string): Promise<ExpiryResponse> {
   try {
-    const encodedSymbol = encodeURIComponent(symbol);
-    const response = await fetch(`${BASE_URL}/getExpiryDates2.php?symbol=${encodedSymbol}`, {
-      headers: {
-        "accept": "*/*",
-        "content-type": "application/json",
-      },
+    const { data, error } = await supabase.functions.invoke('option-chain-proxy', {
+      body: { 
+        endpoint: 'expiry',
+        params: { symbol }
+      }
     });
     
-    if (!response.ok) {
-      throw new Error("Failed to fetch expiry dates");
+    if (error) {
+      console.error("Error fetching expiry dates:", error);
+      throw error;
     }
     
-    return await response.json();
+    return data;
   } catch (error) {
     console.error("Error fetching expiry dates:", error);
     throw error;
@@ -50,21 +46,19 @@ export async function fetchOptionChainData(
   strikeCount: number = 10
 ): Promise<OptionChainResponse> {
   try {
-    const encodedSymbol = encodeURIComponent(symbol);
-    const url = `${BASE_URL}/calculateStrikeDataWithStrikeCount.php?symbol=${encodedSymbol}&expiry=${expiry}&StrikeCount=${strikeCount}`;
-    
-    const response = await fetch(url, {
-      headers: {
-        "accept": "*/*",
-        "content-type": "application/json",
-      },
+    const { data, error } = await supabase.functions.invoke('option-chain-proxy', {
+      body: { 
+        endpoint: 'optionchain',
+        params: { symbol, expiry, strikeCount }
+      }
     });
     
-    if (!response.ok) {
-      throw new Error("Failed to fetch option chain data");
+    if (error) {
+      console.error("Error fetching option chain data:", error);
+      throw error;
     }
     
-    return await response.json();
+    return data;
   } catch (error) {
     console.error("Error fetching option chain data:", error);
     throw error;
