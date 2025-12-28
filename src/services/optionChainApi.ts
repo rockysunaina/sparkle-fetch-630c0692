@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
-import { SymbolsResponse, ExpiryResponse, OptionChainResponse } from "@/types/optionChain";
+import { SymbolsResponse, ExpiryResponse, OptionChainResponse, GroupedSymbols } from "@/types/optionChain";
 
-export async function fetchSymbols(): Promise<string[]> {
+export async function fetchSymbols(): Promise<GroupedSymbols> {
   try {
     const { data, error } = await supabase.functions.invoke('option-chain-proxy', {
       body: { endpoint: 'symbols' }
@@ -12,7 +12,10 @@ export async function fetchSymbols(): Promise<string[]> {
       throw error;
     }
     
-    return data.symbols || [];
+    return {
+      indexSymbols: data["index symbols"] || [],
+      stockSymbols: data.symbols || []
+    };
   } catch (error) {
     console.error("Error fetching symbols:", error);
     throw error;
