@@ -1,5 +1,11 @@
 export interface SymbolsResponse {
   symbols: string[];
+  "index symbols"?: string[];
+}
+
+export interface GroupedSymbols {
+  indexSymbols: string[];
+  stockSymbols: string[];
 }
 
 export interface ExpiryResponse {

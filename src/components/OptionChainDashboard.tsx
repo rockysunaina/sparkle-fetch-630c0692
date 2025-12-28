@@ -15,7 +15,7 @@ import {
   fetchExpiryDates,
   fetchOptionChainData,
 } from "@/services/optionChainApi";
-import { OptionChainResponse } from "@/types/optionChain";
+import { OptionChainResponse, GroupedSymbols } from "@/types/optionChain";
 
 export function OptionChainDashboard() {
   const [selectedSymbol, setSelectedSymbol] = useState<string>("");
@@ -26,10 +26,10 @@ export function OptionChainDashboard() {
 
   // Fetch symbols
   const {
-    data: symbols = [],
+    data: symbols = { indexSymbols: [], stockSymbols: [] },
     isLoading: symbolsLoading,
     error: symbolsError,
-  } = useQuery({
+  } = useQuery<GroupedSymbols>({
     queryKey: ["symbols"],
     queryFn: fetchSymbols,
     staleTime: 5 * 60 * 1000, // 5 minutes
